@@ -23,3 +23,29 @@ export const getContactById = async (contactId) => {
         throw new Error("Could not fetch contact");
     }
 };
+
+export const createContact = async (payload) => {
+    const contact = await ContactsCollection.create(payload);
+    return contact;
+};
+
+export const deleteContact = async (contactId) => {
+    const contact = await ContactsCollection.findOneAndDelete({
+        _id: contactId,
+    });
+
+    return contact;
+}
+
+export const updateContact = async (contactId, payload, options = {}) => {
+
+    const rawResult = await ContactsCollection.findOneAndUpdate(
+        {_id: contactIdId},
+        payload,
+        {
+            new: true,
+            includeResultMetadata: true,
+            ...options,
+        },
+    );
+};
