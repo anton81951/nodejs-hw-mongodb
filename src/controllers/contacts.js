@@ -21,8 +21,9 @@ export const getContactByIdController = async (req, res, next) => {
     const { contactId } = req.params;
     try {
       const contact = await getContactById(contactId);
-      if (!contact) {
-        throw new createHttpError(404, 'Student not found');
+      if(!contact) {
+        next(createHttpError(404, 'Contact not found'));
+        return;
       }
       res.status(200).json({ status: res.statusCode, data: contact, message: `Successfully found contact with id ${contactId}!` });
     } catch (error) {
@@ -73,6 +74,23 @@ export const getContactByIdController = async (req, res, next) => {
     res.status(status).json({
       status,
       message: 'Successfully upserted a contact!',
+      data: result.contact,
+    });
+  };
+
+  export const patchContactController = async ( req, res, next ) => {
+
+    const { contactId } = req.params;
+    const result = await updateContact(contactId, req.body);
+
+    if(!result) {
+      next(createHttpError(404, 'Contact not found'));
+      return;
+    }
+
+    res.json({
+      status: 200,
+      message: 'Successfully patched a contact!',
       data: result.contact,
     });
   };

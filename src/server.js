@@ -4,7 +4,7 @@ import pino from 'pino-http';
 import cors from 'cors';
 
 import { env } from './utils/env.js';
-import contactRouter from './routers/contactRouter.js';
+import contactRouter from './routers/contacts.js';
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { notFoundHandler } from "./middlewares/notFoundHandler.js";
 
