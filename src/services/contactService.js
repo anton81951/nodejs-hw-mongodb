@@ -1,4 +1,4 @@
-import { ContactsCollection } from "../db/models/contacts.js";
+import { ContactsCollection, PatchCollection } from "../db/models/contacts.js";
 
 export const getAllContacts = async () => {
     try {
@@ -39,8 +39,8 @@ export const deleteContact = async (contactId) => {
 
 export const updateContact = async (contactId, payload, options = {}) => {
 
-    const rawResult = await ContactsCollection.findOneAndUpdate(
-        {_id: contactIdId},
+    const rawResult = await PatchCollection.findOneAndUpdate(
+        {_id: contactId},
         payload,
         {
             new: true,
