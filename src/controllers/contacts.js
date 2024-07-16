@@ -1,4 +1,4 @@
-import { createHttpError } from 'http-errors';
+import createHttpError from 'http-errors';
 import {
   getAllContacts,
   getContactById,
