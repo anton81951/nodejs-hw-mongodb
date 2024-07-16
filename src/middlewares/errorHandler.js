@@ -1,4 +1,4 @@
-import createHttpError from 'http-errors';
+const createHttpError = require('http-errors');
 
 export const errorHandler = (err, req, res, next) => {
     if (createHttpError.isHttpError(err)) {
