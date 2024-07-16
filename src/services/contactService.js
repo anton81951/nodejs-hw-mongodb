@@ -24,47 +24,34 @@ export const getContactById = async (contactId) => {
 };
 
 export const createContact = async (payload) => {
-    try {
-        const contact = await ContactsCollection.create(payload);
-        return contact;
-    } catch (error) {
-        console.error("Error creating contact:", error);
-        throw new Error("Could not create contact");
-    }
+    const contact = await ContactsCollection.create(payload);
+    return contact;
+
 };
 
 export const deleteContact = async (contactId) => {
-    try {
+
         const contact = await ContactsCollection.findOneAndDelete({
             _id: contactId,
         });
-        if (!contact) {
-            throw new Error("Contact not found");
-        }
         return contact;
-    } catch (error) {
-        console.error(`Error deleting contact with ID ${contactId}:`, error);
-        throw new Error("Could not delete contact");
-    }
-}
+};
 
 export const updateContact = async (contactId, payload, options = {}) => {
-    try {
-        const contact = await ContactsCollection.findOneAndUpdate(
+
+        const rawResult = await ContactsCollection.findOneAndUpdate(
             { _id: contactId },
             payload,
             {
                 new: true,
-                runValidators: true,
+                includeResultMetadata: true,
                 ...options,
             },
         );
-        if (!contact) {
-            throw new Error("Contact not found");
+
+        if (!rawResult || !rawResult.value) return null;
+        return {
+            contact: rawResult.value,
+            inNew: Boolean(rawResult ?.lastErrorObject ?.upserted),
         }
-        return contact;
-    } catch (error) {
-        console.error(`Error updating contact with ID ${contactId}:`, error);
-        throw new Error("Could not update contact");
-    }
 };
