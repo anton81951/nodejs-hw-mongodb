@@ -1,17 +1,17 @@
-import createHttpError from 'http-errors';
+import { isHttpError } from 'http-errors';
 
-export const errorHandler = (err, req, res, next) => {
-    if (createHttpError.isHttpError(err)) {
-        res.status(err.status).json({
-            status: err.status,
-            message: err.message,
-            data: err,
-        });
-    } else {
-        res.status(500).json({
-            status: 500,
-            message: 'Something went wrong',
-            data: err,
-        });
+function errorHandler(error, _req, res, _next) {
+    if (isHttpError(error) === true) {
+      return res.status(error.status).send({
+        status: error.status,
+        message: error.message,
+      });
     }
-};
+
+    res.status(500).send({
+      status: 500,
+      message: 'Internal server error',
+    });
+  }
+
+  export { errorHandler };
