@@ -1,4 +1,4 @@
-import {SORT_ORDER} from '../constants/index';
+import {SORT_ORDER} from '../constants/index.js';
 
 const parseSortOrder = (sortOrder) => {
 

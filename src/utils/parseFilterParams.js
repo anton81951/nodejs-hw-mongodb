@@ -1,9 +1,6 @@
 const parseType = (type) => {
-    const isString = typeof type === 'string';
-    if (!isString) return;
-    const isType = (type) => ['work', 'home', 'personal'].includes(type);
-
-    if (isType(type)) return type;
+    if (typeof type !== 'string') return undefined;
+    return ['work', 'home', 'personal'].includes(type) ? type : undefined;
 };
 
 const parseIsFavourite = (isFavourite) => {
