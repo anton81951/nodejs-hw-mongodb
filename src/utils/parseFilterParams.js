@@ -1,6 +1,7 @@
 const parseType = (type) => {
     if (typeof type !== 'string') return undefined;
-    return ['work', 'home', 'personal'].includes(type) ? type : undefined;
+    const allowedTypes = ['work', 'home', 'personal'];
+    return allowedTypes.includes(type) ? type : undefined;
 };
 
 const parseIsFavourite = (isFavourite) => {

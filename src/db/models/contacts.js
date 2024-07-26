@@ -1,5 +1,4 @@
 import { model, Schema } from "mongoose";
-import validator from "validator";
 
 const contactsSchema = new Schema(
   {
@@ -13,10 +12,6 @@ const contactsSchema = new Schema(
     },
     email: {
       type: String,
-      validate: {
-        validator: validator.isEmail,
-        message: props => `${props.value} is not a valid email!`,
-      },
       required: false,
     },
     isFavourite: {

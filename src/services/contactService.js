@@ -1,74 +1,109 @@
 import { ContactsCollection } from "../db/models/contacts.js";
-import {calculatePaginationData} from '../utils/calculatePaginationData.js';
-import {SORT_ORDER} from '../constants/index.js';
+import { calculatePaginationData } from '../utils/calculatePaginationData.js';
+import { SORT_ORDER } from '../constants/index.js';
 
 export const getAllContacts = async ({
-    page = 1,
-    perPage = 10,
-    sortOrder = SORT_ORDER.ASC,
-    sortBy = '_id',
-    filter = {},
+  page,
+  perPage,
+  sortOrder,
+  sortBy,
+  filter,
 }) => {
+  try {
     const limit = perPage;
     const skip = (page - 1) * perPage;
 
     const contactsQuery = ContactsCollection.find();
 
     if (filter.type) {
-        contactsQuery.where('type').equals(filter.type);
+      contactsQuery.where('type').equals(filter.type);
     }
 
-    if (typeof filter.isFavourite !== 'undefined') {
-        contactsQuery.where('isFavourite').equals(filter.isFavourite);
-      }
+    if (filter.isFavourite !== undefined) {
+      contactsQuery.where('isFavourite').equals(filter.isFavourite);
+    }
 
-      const [contactsCount, contacts] = await Promise.all([
-        ContactsCollection.countDocuments(contactsQuery),
-        contactsQuery.skip(skip).limit(limit).sort({ [sortBy]: sortOrder }).exec(),
-      ]);
+    const [contactsCount, contacts] = await Promise.all([
+
+        contactsQuery.sort({ [sortBy]: sortOrder }).skip(skip).limit(limit).exec(),
+      ContactsCollection.countDocuments(contactsQuery),
+
+    ]);
+
 
     const paginationData = calculatePaginationData(contactsCount, perPage, page);
 
-    paginationData.hasNextPage = page < paginationData.totalPages;
-    paginationData.hasPreviousPage = page > 1;
-
-
     return {
-        data: contacts,
+      data: contacts,
+      pagination: {
         ...paginationData,
+        hasNextPage: page < paginationData.totalPages,
+        hasPreviousPage: page > 1,
+      },
     };
+  } catch (error) {
+    console.error('Error fetching contacts', error);
+    throw new Error('Error fetching contacts');
+  }
 };
 
 export const getContactById = async (contactId) => {
-        return ContactsCollection.findById(contactId);
+  try {
+    const contact = await ContactsCollection.findById(contactId);
+    if (!contact) {
+      throw new Error('Contact not found');
+    }
+    return contact;
+  } catch (error) {
+    console.error('Error fetching contacts');
+    throw new Error('Failed to fetch contact by ID');
+  }
 };
 
 export const createContact = async (contact) => {
-    return ContactsCollection.create(contact);
-
+  try {
+    return await ContactsCollection.create(contact);
+  } catch (error) {
+    console.error('Error creating contact:', error);
+    throw new Error('Failed to create contact');
+  }
 };
 
 export const deleteContact = async (contactId) => {
-        return ContactsCollection.findByIdAndDelete(contactId);
+  try {
+    const contact = await ContactsCollection.findByIdAndDelete(contactId);
+    if (!contact) {
+      throw new Error('Contact not found');
+    }
+    return contact;
+  } catch (error) {
+    console.error('Error deleting contact:', error);
+    throw new Error('Failed to delete contact');
+  }
 };
 
 export const updateContact = async (contactId, payload, options = {}) => {
+  try {
     const updatedContact = await ContactsCollection.findByIdAndUpdate(
-        contactId,
-        payload,
-        {
-            new: true,
-            runValidators: true,
-            ...options,
-        }
+      contactId,
+      payload,
+      {
+        new: true,
+        runValidators: true,
+        ...options,
+      }
     );
 
     if (!updatedContact) {
-        return null;
+      throw new Error('Contact not found');
     }
 
     return {
-        contact: updatedContact,
-        inNew: options.upsert ? true : false,
+      contact: updatedContact,
+      isNew: options.upsert ?? false,
     };
+  } catch (error) {
+    console.error('Error updating contact:', error);
+    throw new Error('Failed to update contact');
+  }
 };
