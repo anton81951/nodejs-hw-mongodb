@@ -17,12 +17,20 @@ export const getContactsController = async (req, res, next) => {
     const { sortBy, sortOrder } = parseSortParams(req.query);
     const filter = parseFilterParams(req.query);
 
-    const contacts = await getAllContacts({ page, perPage, sortBy, sortOrder, filter });
+    const contactsResult = await getAllContacts({ page, perPage, sortBy, sortOrder, filter });
 
     res.status(200).json({
-      status: res.statusCode,
-      data: contacts,
+      status: 200,
       message: 'Successfully found contacts!',
+      data: {
+        data: contactsResult.data,
+        page: contactsResult.pagination.page,
+        perPage: contactsResult.pagination.perPage,
+        totalItems: contactsResult.totalItems,
+        totalPages: contactsResult.pagination.totalPages,
+        hasPreviousPage: contactsResult.pagination.hasPreviousPage,
+        hasNextPage: contactsResult.pagination.hasNextPage
+      }
     });
   } catch (error) {
     next(createHttpError(500, 'Failed to fetch contacts'));
@@ -74,11 +82,7 @@ export const deleteContactController = async (req, res, next) => {
       return next(createHttpError(404, 'Contact not found'));
     }
 
-    res.status(200).json({
-      status: 200,
-      message: 'Contact deleted',
-      data: result,
-    });
+    res.status(204).send();
   } catch (error) {
     next(createHttpError(500, 'Failed to delete contact'));
   }
