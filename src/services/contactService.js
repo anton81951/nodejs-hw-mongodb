@@ -2,13 +2,7 @@ import { ContactsCollection } from "../db/models/contacts.js";
 import { calculatePaginationData } from '../utils/calculatePaginationData.js';
 import { SORT_ORDER } from '../constants/index.js';
 
-export const getAllContacts = async ({
-  page,
-  perPage,
-  sortOrder,
-  sortBy,
-  filter,
-}) => {
+export const getAllContacts = async ({ page, perPage, sortOrder, sortBy, filter }) => {
   try {
     const limit = perPage;
     const skip = (page - 1) * perPage;
@@ -23,23 +17,17 @@ export const getAllContacts = async ({
       contactsQuery.where('isFavourite').equals(filter.isFavourite);
     }
 
-    const [contactsCount, contacts] = await Promise.all([
-
-        contactsQuery.sort({ [sortBy]: sortOrder }).skip(skip).limit(limit).exec(),
-      ContactsCollection.countDocuments(contactsQuery),
-
+    const [contacts, contactsCount] = await Promise.all([
+      contactsQuery.sort({ [sortBy]: sortOrder }).skip(skip).limit(limit).exec(),
+      ContactsCollection.countDocuments(contactsQuery)
     ]);
-
 
     const paginationData = calculatePaginationData(contactsCount, perPage, page);
 
     return {
       data: contacts,
-      pagination: {
-        ...paginationData,
-        hasNextPage: page < paginationData.totalPages,
-        hasPreviousPage: page > 1,
-      },
+      totalItems: contactsCount,
+      pagination: paginationData
     };
   } catch (error) {
     console.error('Error fetching contacts', error);
