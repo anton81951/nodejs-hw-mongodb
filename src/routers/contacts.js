@@ -1,10 +1,9 @@
 import { Router } from "express";
-import express from 'express';
 
 import { validateBody } from "../middlewares/validateBody.js";
 import { isValidId } from "../middlewares/isValidId.js";
 
-import { createContactSchema, updateContactSchema } from "../validation/contacts.js";
+import { createContactSchema } from "../validation/contacts.js";
 
 import {
   getContactsController,
@@ -18,7 +17,6 @@ import {
 import { ctrlWrapper } from "../utils/ctrlWrapper.js";
 
 const contactRouter = Router();
-const jsonParser = express.json();
 
 contactRouter.get('/contacts', ctrlWrapper(getContactsController));
 contactRouter.get('/contacts/:contactId', isValidId, ctrlWrapper(getContactByIdController));
