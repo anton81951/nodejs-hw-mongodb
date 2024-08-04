@@ -1,50 +1,43 @@
-import createHttpError from "http-errors";
+import createHttpError from 'http-errors';
+import { SessionsCollection } from '../db/models/session.js';
+import { UsersCollection } from '../db/models/user.js';
 
-import { SessionsCollection } from "../db/models/session.js";
-import { UsersCollection } from "../db/models/user.js";
+export const authenticate = async (req, res, next) => {
+  try {
+    const authHeader = req.get('Authorization');
 
-export const authentificate =
-async (req, res, next) => {
-    const authHeader = req.get('Autthorization');
-
-    if(!authHeader) {
-        next(createHttpError(401, 'Please provide Authorization header'));
-        return;
+    if (!authHeader) {
+      return next(createHttpError(401, 'Authorization header is required'));
     }
 
-    const bearer = authHeader.split(' ')[0];
-    const token = authHeader.split(' ')[1];
+    const [bearer, token] = authHeader.split(' ');
 
-    if ( bearer !== 'Bearer' || !token) {
-        next(createHttpError(401, 'Auth header should be of type Bearer'));
-        return;
+    if (bearer !== 'Bearer' || !token) {
+      return next(createHttpError(401, 'Authorization header must be of type Bearer and include a token'));
     }
 
-    const session = await SessionsCollection.findOne({
-        accessToken: token
-    });
+    const session = await SessionsCollection.findOne({ accessToken: token });
 
-    if(!session) {
-        next(createHttpError(401, 'Session not found'));
-        return;
+    if (!session) {
+      return next(createHttpError(401, 'Session not found'));
     }
 
     const isAccessTokenExpired = new Date() > new Date(session.accessTokenValidUntil);
 
-    if(isAccessTokenExpired) {
-        next(createHttpError(401, 'Accesstoken expired'));
+    if (isAccessTokenExpired) {
+      return next(createHttpError(401, 'Access token expired'));
     }
 
     const user = await UsersCollection.findById(session.userId);
 
-    if(!user) {
-        next(createHttpError(401));
-        return;
+    if (!user) {
+      return next(createHttpError(401, 'User not found'));
     }
 
     req.user = user;
-
     next();
+  } catch (error) {
+    console.error('Authentication error:', error);
+    next(createHttpError(500, 'Internal Server Error'));
+  }
 };
-
-

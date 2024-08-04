@@ -15,11 +15,11 @@ import {
 } from "../controllers/contacts.js";
 
 import { ctrlWrapper } from "../utils/ctrlWrapper.js";
-import { authentificate } from "../middlewares/authenticate.js";
+import { authenticate } from "../middlewares/authenticate.js";
 
 const contactRouter = Router();
 
-contactRouter.use(authentificate);  
+contactRouter.use(authenticate);
 
 contactRouter.get('/contacts', ctrlWrapper(getContactsController));
 contactRouter.get('/contacts/:contactId', isValidId, ctrlWrapper(getContactByIdController));
