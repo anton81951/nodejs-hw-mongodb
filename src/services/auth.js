@@ -7,7 +7,7 @@ import { FIFTEEN_MINUTES, ONE_DAY, ONE_MONTH } from '../constants/index.js';
 import { SessionsCollection } from '../db/models/session.js';
 import { UsersCollection } from '../db/models/user.js';
 
-import { SMTP, TEMPLATE_DIR, APP_DOMAIN } from '../constants/index.js';
+import { SMTP, TEMPLATE_DIR } from '../constants/index.js';
 import { env } from '../utils/env.js';
 import { sendEmail } from '../utils/sendMail.js';
 
@@ -147,7 +147,7 @@ export const resetPassword = async (payload) => {
   let entries;
 
   try {
-    entries = jwt.verify(payload.token, env('JWT_SECRET'));
+    entries = jwt.verify(payload.token, process.env.JWT_SECRET);
   } catch (err) {
     if (err instanceof Error) throw createHttpError(401, err.message);
     throw err;
