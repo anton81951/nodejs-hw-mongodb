@@ -10,11 +10,11 @@ export const ONE_MONTH = 24 * 60 * 60 * 1000*30;
 export const ONE_DAY = 24 * 60 * 60 * 1000;
 
 export const SMTP = {
-    SMTP_HOST: 'SMTP_HOST',
-    SMTP_PORT: 'SMTP_PORT',
-    SMTP_USER: 'SMTP_USER',
-    SMTP_PASSWORD: 'SMTP_PASSWORD',
-    SMTP_FROM: 'SMTP_FROM',
+    HOST: process.env.SMTP_HOST,
+    PORT: Number(process.env.SMTP_PORT),
+    USER: process.env.SMTP_USER,
+    PASSWORD: process.env.SMTP_PASSWORD,
+    FROM_EMAIL: process.env.SMTP_FROM_EMAIL,
   };
 
-  export const TEMPLATES_DIR = path.join(process.cwd(), 'src', 'templates');
+  export const TEMPLATE_DIR = path.resolve('src', 'templates');

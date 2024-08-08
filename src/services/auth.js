@@ -7,7 +7,7 @@ import { FIFTEEN_MINUTES, ONE_DAY, ONE_MONTH } from '../constants/index.js';
 import { SessionsCollection } from '../db/models/session.js';
 import { UsersCollection } from '../db/models/user.js';
 
-import { SMTP } from '../constants/index.js';
+import { SMTP, TEMPLATE_DIR, APP_DOMAIN } from '../constants/index.js';
 import { env } from '../utils/env.js';
 import { sendEmail } from '../utils/sendMail.js';
 
@@ -115,31 +115,28 @@ export const requestResetToken = async (email) => {
   const resetToken = jwt.sign(
     {
       sub: user._id,
-      email,
+      email: user.email,
     },
-    env('JWT_SECRET'),
+    process.env.JWT_SECRET,
     {
       expiresIn: '15m',
     },
   );
 
-  const resetPasswordTemplatePath = path.join(
-    TEMPLATES_DIR,
-    'reset-password-email.html',
-  );
 
-  const templateSource = (
-    await fs.readFile(resetPasswordTemplatePath)
-  ).toString();
+  const templateFile = path.join(TEMPLATE_DIR, 'reset-password-email.html');
+
+  const templateSource = await fs.readFile(templateFile, { encoding: 'utf-8' });
 
   const template = handlebars.compile(templateSource);
+
   const html = template({
     name: user.name,
-    link: `${env('APP_DOMAIN')}/reset-password?token=${resetToken}`,
+    link: `${process.env.APP_DOMAIN}/reset-password?token=${resetToken}`,
   });
 
   await sendEmail({
-    from: env(SMTP.SMTP_FROM),
+    from: SMTP.FROM_EMAIL,
     to: email,
     subject: 'Reset your password',
     html,
