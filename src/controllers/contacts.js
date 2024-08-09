@@ -10,6 +10,7 @@ import {
 import { parsePaginationParams } from '../utils/parsePaginationParams.js';
 import { parseSortParams } from '../utils/parseSortParams.js';
 import { parseFilterParams } from '../utils/parseFilterParams.js';
+import { saveFileToCloudinary } from '../utils/saveFileToCloudinary.js';
 
 export const getContactsController = async (req, res, next) => {
   try {
@@ -66,6 +67,12 @@ export const getContactByIdController = async (req, res, next) => {
 export const createContactController = async (req, res, next) => {
   try {
     const { name, phoneNumber, email, isFavourite, contactType } = req.body;
+    let photoUrl = '';
+
+    if (req.file) {
+      photoUrl = await saveFileToCloudinary(req.file);
+    }
+
     const contact = {
       name,
       phoneNumber,
@@ -73,6 +80,7 @@ export const createContactController = async (req, res, next) => {
       isFavourite,
       contactType,
       userId: req.user._id,
+      photo: photoUrl,
     };
 
     const createdContact = await createContact(contact);
@@ -105,7 +113,13 @@ export const deleteContactController = async (req, res, next) => {
 export const updateContactController = async (req, res, next) => {
   const { contactId } = req.params;
   try {
-    const result = await updateContact(contactId, req.body, req.user._id, { upsert: true });
+    let updatedData = req.body;
+
+    if (req.file) {
+      updatedData.photo = await saveFileToCloudinary(req.file);
+    }
+
+    const result = await updateContact(contactId, updatedData, req.user._id, { upsert: true });
 
     if (!result) {
       return next(createHttpError(404, 'Contact not found'));
@@ -126,7 +140,13 @@ export const updateContactController = async (req, res, next) => {
 export const patchContactController = async (req, res, next) => {
   const { contactId } = req.params;
   try {
-    const result = await updateContact(contactId, req.body, req.user._id);
+    let updatedData = req.body;
+
+    if (req.file) {
+      updatedData.photo = await saveFileToCloudinary(req.file);
+    }
+
+    const result = await updateContact(contactId, updatedData, req.user._id);
 
     if (!result) {
       return next(createHttpError(404, 'Contact not found'));
