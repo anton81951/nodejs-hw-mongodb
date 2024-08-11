@@ -119,9 +119,13 @@ export const requestResetToken = async (email) => {
     },
     process.env.JWT_SECRET,
     {
-      expiresIn: '15m',
+      expiresIn: '5m',
     },
   );
+
+  const resetLink = `${process.env.APP_DOMAIN}/reset-password?token=${resetToken}`;
+
+console.log('Reset link:', resetLink);
 
 
   const templateFile = path.join(TEMPLATE_DIR, 'reset-password-email.html');
@@ -144,28 +148,30 @@ export const requestResetToken = async (email) => {
 };
 
 export const resetPassword = async (payload) => {
-  let entries;
-
   try {
-    entries = jwt.verify(payload.token, process.env.JWT_SECRET);
-  } catch (err) {
-    if (err instanceof Error) throw createHttpError(401, err.message);
-    throw err;
+    const decoded = jwt.verify(payload.token, process.env.JWT_SECRET);
+
+    const user = await UsersCollection.findOne({
+      _id: decoded.sub,
+      email: decoded.email,
+    });
+
+    if (!user) {
+      throw createHttpError(404, 'User not found');
+    }
+
+    const encryptedPassword = await bcrypt.hash(payload.password, 10);
+    await UsersCollection.updateOne(
+      { _id: user._id },
+      { password: encryptedPassword }
+    );
+
+    await SessionsCollection.deleteMany({ userId: user._id });
+
+  } catch (error) {
+    if (error.name === 'JsonWebTokenError' || error.name === 'TokenExpiredError') {
+      throw createHttpError(401, 'Token is expired or invalid.');
+    }
+    throw error;
   }
-
-  const user = await UsersCollection.findOne({
-    email: entries.email,
-    _id: entries.sub,
-  });
-
-  if (!user) {
-    throw createHttpError(404, 'User not found');
-  }
-
-  const encryptedPassword = await bcrypt.hash(payload.password, 10);
-
-  await UsersCollection.updateOne(
-    { _id: user._id },
-    { password: encryptedPassword },
-  );
 };
