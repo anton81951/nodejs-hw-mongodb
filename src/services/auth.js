@@ -136,7 +136,7 @@ console.log('Reset link:', resetLink);
 
   const html = template({
     name: user.name,
-    link: `${process.env.APP_DOMAIN}/reset-password?token=${resetToken}`,
+    link: `${process.env.APP_DOMAIN}/reset-pwd?token=${resetToken}`,
   });
 
   await sendEmail({
