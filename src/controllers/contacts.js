@@ -43,6 +43,7 @@ export const getContactsController = async (req, res, next) => {
       }
     });
   } catch (error) {
+    console.error('Error fetching contacts:', error);
     next(createHttpError(500, 'Failed to fetch contacts'));
   }
 };
@@ -62,6 +63,7 @@ export const getContactByIdController = async (req, res, next) => {
       message: `Successfully found contact with id ${contactId}!`,
     });
   } catch (error) {
+    console.error('Error fetching contact by ID:', error);
     next(createHttpError(500, 'Failed to fetch contact by ID'));
   }
 };
@@ -72,10 +74,15 @@ export const createContactController = async (req, res, next) => {
     let photoUrl = '';
 
     if (req.file) {
-      if (process.env.ENABLE_CLOUDINARY === true) {
-        photoUrl = await saveFileToCloudinary(req.file);
-      } else {
-        photoUrl = await saveFileToUploadDir(req.file);
+      try {
+        if (env('ENABLE_CLOUDINARY') === 'true') {
+          photoUrl = await saveFileToCloudinary(req.file);
+        } else {
+          photoUrl = await saveFileToUploadDir(req.file);
+        }
+      } catch (uploadError) {
+        console.error('Error uploading photo:', uploadError);
+        return next(createHttpError(500, 'Failed to upload photo'));
       }
     }
 
@@ -97,6 +104,7 @@ export const createContactController = async (req, res, next) => {
       data: createdContact,
     });
   } catch (error) {
+    console.error('Error creating contact:', error);
     next(createHttpError(500, 'Failed to create contact'));
   }
 };
@@ -112,6 +120,7 @@ export const deleteContactController = async (req, res, next) => {
 
     res.status(204).send();
   } catch (error) {
+    console.error('Error deleting contact:', error);
     next(createHttpError(500, 'Failed to delete contact'));
   }
 };
@@ -122,7 +131,12 @@ export const updateContactController = async (req, res, next) => {
     let updatedData = req.body;
 
     if (req.file) {
-      updatedData.photo = await saveFileToCloudinary(req.file);
+      try {
+        updatedData.photo = await saveFileToCloudinary(req.file);
+      } catch (uploadError) {
+        console.error('Error uploading photo:', uploadError);
+        return next(createHttpError(500, 'Failed to upload photo'));
+      }
     }
 
     const result = await updateContact(contactId, updatedData, req.user._id, { upsert: true });
@@ -139,6 +153,7 @@ export const updateContactController = async (req, res, next) => {
       data: result.contact,
     });
   } catch (error) {
+    console.error('Error updating contact:', error);
     next(createHttpError(500, 'Failed to update contact'));
   }
 };
@@ -149,10 +164,15 @@ export const patchContactController = async (req, res, next) => {
     let updatedData = req.body;
 
     if (req.file) {
-      if (process.env.ENABLE_CLOUDINARY === true) {
-        updatedData.photo = await saveFileToCloudinary(req.file);
-      } else {
-        updatedData.photo = await saveFileToUploadDir(req.file);
+      try {
+        if (env('ENABLE_CLOUDINARY') === 'true') {
+          updatedData.photo = await saveFileToCloudinary(req.file);
+        } else {
+          updatedData.photo = await saveFileToUploadDir(req.file);
+        }
+      } catch (uploadError) {
+        console.error('Error uploading photo:', uploadError);
+        return next(createHttpError(500, 'Failed to upload photo'));
       }
     }
 
@@ -168,6 +188,7 @@ export const patchContactController = async (req, res, next) => {
       data: result.contact,
     });
   } catch (error) {
+    console.error('Error patching contact:', error);
     next(createHttpError(500, 'Failed to patch contact'));
   }
 };

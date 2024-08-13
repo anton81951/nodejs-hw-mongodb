@@ -8,12 +8,15 @@ cloudinary.v2.config({
   api_secret: CLOUDINARY.API_SECRET,
 });
 
-export const saveFileToCloudinary = async (file) => {
+export const saveFileToCloudinary = async (file, folder = 'contacts') => {
   try {
-    const response = await cloudinary.v2.uploader.upload(file.path);
+    const response = await cloudinary.v2.uploader.upload(file.path, {
+      folder: folder,
+    });
     await fs.unlink(file.path);
     return response.secure_url;
   } catch (error) {
+    console.error('Cloudinary upload error:', error);
     throw new Error('Failed to upload file to Cloudinary');
   }
 };
