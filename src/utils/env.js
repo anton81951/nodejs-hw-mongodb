@@ -7,7 +7,10 @@ export function env(name, defaultValue) {
 
   if (value) return value;
 
-  if (defaultValue) return defaultValue;
+  if (defaultValue) {
+    console.warn(`Warning: Using default value for process.env['${name}'].`);
+    return defaultValue;
+  }
 
   throw new Error(`Missing: process.env['${name}'].`);
 }
