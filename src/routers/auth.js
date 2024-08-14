@@ -18,6 +18,8 @@ import { resetPasswordController } from '../controllers/auth.js';
 import { validateBody } from '../middlewares/validateBody.js';
 
 import { getGoogleOAuthUrlController } from '../controllers/auth.js';
+import {loginWithGoogleOAuthSchema} from '../validation/auth.js';
+import {loginWithGoogleController} from '../controllers/auth.js';
 
 
 const authRouter = Router();
