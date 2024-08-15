@@ -8,8 +8,8 @@ export const getAllContacts = async ({ page, perPage, sortOrder, sortBy, filter,
 
     const contactsQuery = ContactsCollection.find({ userId });
 
-    if (filter.type) {
-      contactsQuery.where('type').equals(filter.type);
+    if (filter.contactType) {
+      contactsQuery.where('contactType').equals(filter.contactType);
     }
 
     if (filter.isFavourite !== undefined) {
@@ -29,8 +29,8 @@ export const getAllContacts = async ({ page, perPage, sortOrder, sortBy, filter,
       pagination: paginationData
     };
   } catch (error) {
-    console.error('Error fetching contacts', error);
-    throw new Error('Error fetching contacts');
+    console.error('Error fetching contacts:', error);
+    throw new Error('Failed to fetch contacts');
   }
 };
 
@@ -56,7 +56,7 @@ export const createContact = async (contact) => {
   }
 };
 
-export const deleteContact = async (contactId) => {
+export const deleteContact = async (contactId, userId) => {
   try {
     const contact = await ContactsCollection.findOneAndDelete({ _id: contactId, userId });
     if (!contact) {
@@ -64,7 +64,7 @@ export const deleteContact = async (contactId) => {
     }
     return contact;
   } catch (error) {
-    console.error('Error deleting contact:', error);
+    console.error('Error deleting contact:', error.message);
     throw new Error('Failed to delete contact');
   }
 };
