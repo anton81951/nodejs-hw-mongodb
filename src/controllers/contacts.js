@@ -53,17 +53,15 @@ export const getContactByIdController = async (req, res, next) => {
   try {
     const contact = await getContactById(contactId, req.user._id);
 
-    if (!contact) {
-      return next(createHttpError(404, 'Contact not found'));
-    }
-
     res.status(200).json({
       status: res.statusCode,
       data: contact,
       message: `Successfully found contact with id ${contactId}!`,
     });
   } catch (error) {
-    console.error('Error fetching contact by ID:', error);
+    if (error.status === 404) {
+      return next(createHttpError(404, 'Contact not found'));
+    }
     next(createHttpError(500, 'Failed to fetch contact by ID'));
   }
 };

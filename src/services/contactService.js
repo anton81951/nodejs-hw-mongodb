@@ -38,12 +38,14 @@ export const getContactById = async (contactId, userId) => {
   try {
     const contact = await ContactsCollection.findOne({ _id: contactId, userId });
     if (!contact) {
-      throw new Error('Contact not found');
+      const error = new Error('Contact not found');
+      error.status = 404;
+      throw error;
     }
     return contact;
   } catch (error) {
-    console.error('Error fetching contacts');
-    throw new Error('Failed to fetch contact by ID');
+    console.error('Error fetching contact by ID:', error);
+    throw error.status === 404 ? error : new Error('Failed to fetch contact by ID');
   }
 };
 
@@ -60,18 +62,20 @@ export const deleteContact = async (contactId, userId) => {
   try {
     const contact = await ContactsCollection.findOneAndDelete({ _id: contactId, userId });
     if (!contact) {
-      throw new Error('Contact not found');
+      const error = new Error('Contact not found');
+      error.status = 404;
+      throw error;
     }
     return contact;
   } catch (error) {
     console.error('Error deleting contact:', error.message);
-    throw new Error('Failed to delete contact');
+    throw error.status === 404 ? error : new Error('Failed to delete contact');
   }
 };
 
 export const updateContact = async (contactId, payload, userId, options = {}) => {
   try {
-    const updatedContact = await ContactsCollection.findByIdAndUpdate(
+    const updatedContact = await ContactsCollection.findOneAndUpdate(
       { _id: contactId, userId },
       payload,
       {
@@ -82,7 +86,9 @@ export const updateContact = async (contactId, payload, userId, options = {}) =>
     );
 
     if (!updatedContact) {
-      throw new Error('Contact not found');
+      const error = new Error('Contact not found');
+      error.status = 404;
+      throw error;
     }
 
     return {
@@ -91,6 +97,6 @@ export const updateContact = async (contactId, payload, userId, options = {}) =>
     };
   } catch (error) {
     console.error('Error updating contact:', error);
-    throw new Error('Failed to update contact');
+    throw error.status === 404 ? error : new Error('Failed to update contact');
   }
 };
