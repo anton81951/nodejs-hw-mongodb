@@ -119,7 +119,7 @@ export const deleteContactController = async (req, res, next) => {
     res.status(204).send();
   } catch (error) {
     console.error('Error deleting contact:', error);
-    next(createHttpError(500, 'Failed to delete contact'));
+    next(createHttpError(error.status || 500, error.message || 'Failed to delete contact'));
   }
 };
 
@@ -143,7 +143,7 @@ export const updateContactController = async (req, res, next) => {
       return next(createHttpError(404, 'Contact not found'));
     }
 
-    const status = result.inNew ? 201 : 200;
+    const status = result.isNew ? 201 : 200;
 
     res.status(status).json({
       status,
@@ -152,7 +152,7 @@ export const updateContactController = async (req, res, next) => {
     });
   } catch (error) {
     console.error('Error updating contact:', error);
-    next(createHttpError(500, 'Failed to update contact'));
+    next(createHttpError(error.status || 500, error.message || 'Failed to update contact'));
   }
 };
 
@@ -182,11 +182,11 @@ export const patchContactController = async (req, res, next) => {
 
     res.status(200).json({
       status: 200,
-      message: 'Successfully patched contact!',
+      message: 'Successfully updated contact!',
       data: result.contact,
     });
   } catch (error) {
-    console.error('Error patching contact:', error);
-    next(createHttpError(500, 'Failed to patch contact'));
+    console.error('Error updating contact:', error);
+    next(createHttpError(error.status || 500, error.message || 'Failed to update contact'));
   }
 };
